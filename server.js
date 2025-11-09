@@ -21,21 +21,27 @@ const app = express();
 connectDB();
 
 // =========================================
-// 🔧 Middleware
+// 🔧 Middleware (CORS + JSON Parser)
 // =========================================
 app.use(
   cors({
-    origin: "http://localhost:5173", // ✅ Your React frontend (Vite)
-    credentials: true,
+    origin: [
+      "http://localhost:5173",                     // ✅ Local frontend (development)
+      "https://ceps-rosy.vercel.app",              // ✅ Live frontend (production)
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // allow cookies/tokens to be sent
   })
 );
+
 app.use(express.json());
 
 // =========================================
 // 🌍 Root Route (Health Check)
 // =========================================
 app.get("/", (req, res) => {
-  res.send("✅ CEPS Backend Running Successfully 🚀");
+  res.status(200).send("✅ CEPS Backend Running Successfully 🚀");
 });
 
 // =========================================
@@ -49,7 +55,7 @@ import attendanceRoutes from "./src/routes/attendanceRoutes.js";
 import trainerRoutes from "./src/routes/trainerRoutes.js";
 import analyticsRoutes from "./src/routes/analyticsRoutes.js";
 import feedbackRoutes from "./src/routes/feedbackRoutes.js";
-import notificationRoutes from "./src/routes/notificationRoutes.js"; // ✅ Newly added import
+import notificationRoutes from "./src/routes/notificationRoutes.js";
 
 // =========================================
 // 🚏 Mount Routes
@@ -59,11 +65,10 @@ app.use("/api/events", eventRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/attendance", attendanceRoutes);
-
 app.use("/api/trainers", trainerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/feedback", feedbackRoutes);
-app.use("/api/notifications", notificationRoutes); // ✅ Added notification API
+app.use("/api/notifications", notificationRoutes);
 
 // =========================================
 // ⚙️ Global Error Handling Middleware
@@ -82,7 +87,7 @@ app.use((err, req, res, next) => {
 // =========================================
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log("========================================");
   console.log(`🚀 CEPS Backend Server running on port ${PORT}`);
   console.log("✅ MongoDB Connection: Successful");
